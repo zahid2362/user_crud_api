@@ -14,7 +14,7 @@ class UserService implements UserServiceInterface
 {
     /**
      * @param Request $request
-     * @return array<string, mixed> 
+     * @return array<string, mixed>
     */
     public function index(Request $request): array
     {
@@ -28,10 +28,10 @@ class UserService implements UserServiceInterface
             return $this->error(__('message.error'));
         }
     }
-    
+
     /**
      * @param UserRequest $request
-     * @return array<string, mixed> 
+     * @return array<string, mixed>
     */
     public function store(UserRequest $request): array
     {
@@ -54,7 +54,7 @@ class UserService implements UserServiceInterface
 
     /**
      * @param string $id
-     * @return array<string, mixed> 
+     * @return array<string, mixed>
      */
     public function show(string $id): array
     {
@@ -75,7 +75,7 @@ class UserService implements UserServiceInterface
     /**
      * @param string $id
      * @param UserRequest $request
-     * @return array<string, mixed> 
+     * @return array<string, mixed>
      */
     public function update(string $id, UserRequest $request): array
     {
@@ -106,7 +106,7 @@ class UserService implements UserServiceInterface
 
     /**
      * @param string $id
-     * @return array<string, mixed> 
+     * @return array<string, mixed>
      */
     public function destroy(string $id): array
     {
@@ -133,11 +133,11 @@ class UserService implements UserServiceInterface
         if (!empty($avatar) && Storage::exists($avatar)) {
             Storage::delete($avatar);
         }
-        
+
         $file_name = date('ymdhis') . '-' . rand(1111, 9999) . '.' . $file->getClientOriginalExtension();
         return Storage::putFileAs(User::AVATAR_PATH, $file, $file_name);
     }
-    
+
     /**
      * @param string $message
      * @param int $status
