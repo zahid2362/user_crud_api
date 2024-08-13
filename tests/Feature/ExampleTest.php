@@ -10,10 +10,10 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function get_all_user_response(): void
+    public function test_the_application_returns_a_successful_response(): void
     {
-        $response = $this->get('/api/user');
+        $response = $this->get('/');
 
-        $response->assertStatus(000);
+        $response->assertStatus(200);
     }
 }
