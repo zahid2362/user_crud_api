@@ -22,7 +22,6 @@ class UserController extends Controller
 
     public function store(UserRequest $request)
     {
-        dd($request->all());
         $data = $this->service->store($request);
         return response()->json(Arr::except($data, ['status']), $data['status'] ?? 200);
     }
