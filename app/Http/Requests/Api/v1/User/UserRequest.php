@@ -24,7 +24,7 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return request()->routeIs('user.create') ? $this->createUserRules() : $this->UpdateUserRules();
+        return request()->method() == 'POST' ? $this->createUserRules() : $this->UpdateUserRules();
     }
 
     public function createUserRules(): array
@@ -48,7 +48,7 @@ class UserRequest extends FormRequest
         ];
     }
 
-     
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
