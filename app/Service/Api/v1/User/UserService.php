@@ -9,9 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Interface\Api\v1\User\UserServiceInterface;
+use Illuminate\Contracts\Pagination\Paginator;
 
 class UserService implements UserServiceInterface
 {
+    public function __construct(public string $logChannel = 'user_service')
+    {
+    }
     /**
      * @param Request $request
      * @return array<string, mixed>
@@ -19,12 +23,13 @@ class UserService implements UserServiceInterface
     public function index(Request $request): array
     {
         try {
+            $users = User::paginate($request->per_page ?? 10);
             return [
                 'success' => true,
-                'data' => User::all()
+                'users' => $users
             ];
         } catch (Exception $ex) {
-            Log::channel('user_service')->error($ex->getMessage());
+            Log::channel($this->logChannel)->error($ex->getMessage());
             return $this->error(__('message.error'));
         }
     }
@@ -47,7 +52,7 @@ class UserService implements UserServiceInterface
                 'data' => $user
             ];
         } catch (Exception $ex) {
-            Log::channel('user_service')->error($ex->getMessage());
+            Log::channel($this->logChannel)->error($ex->getMessage());
             return $this->error(__('message.error'));
         }
     }
@@ -67,7 +72,7 @@ class UserService implements UserServiceInterface
             ] : $this->error(__('message.user.not.found'), 404);
 
         } catch (Exception $ex) {
-            Log::channel('user_service')->error($ex->getMessage());
+            Log::channel($this->logChannel)->error($ex->getMessage());
             return $this->error(__('message.error'));
         }
     }
@@ -82,6 +87,7 @@ class UserService implements UserServiceInterface
         try {
             $data = $request->validated();
             $user = User::find($id);
+
             if(empty($user)) {
                 return $this->error(__('message.user.not.found'), 404);
             }
@@ -99,7 +105,7 @@ class UserService implements UserServiceInterface
             ];
 
         } catch (Exception $ex) {
-            Log::channel('user_service')->error($ex->getMessage());
+            Log::channel($this->logChannel)->error($ex->getMessage());
             return $this->error(__('message.error'));
         }
     }
@@ -118,7 +124,7 @@ class UserService implements UserServiceInterface
                 'message' => __('message.user.deleted')
             ] : $this->error(__('message.user.not.found'), 404);
         } catch (Exception $ex) {
-            Log::channel('user_service')->error($ex->getMessage());
+            Log::channel($this->logChannel)->error($ex->getMessage());
             return $this->error(__('message.error'));
         }
     }
