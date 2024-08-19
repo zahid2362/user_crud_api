@@ -54,6 +54,7 @@ class UserRequest extends FormRequest
         throw new HttpResponseException(
             response()->json([
                 'success' => false,
+                'message' => __('message.error'),
                 'errors' => $validator->errors()
             ], Response::HTTP_UNPROCESSABLE_ENTITY)
         );
