@@ -13,7 +13,7 @@ class UserTest extends TestCase
      */
     public function test_get_all_user(): void
     {
-        $response = $this->get('/api/user');
+        $response = $this->get('/api/v1/user');
 
         $response->assertStatus(200)->assertJson(
             fn (AssertableJson $json) =>
@@ -24,7 +24,7 @@ class UserTest extends TestCase
 
     public function test_create_user_with_empty_body(): void
     {
-        $response = $this->postJson('/api/user', []);
+        $response = $this->postJson('/api/v1/user', []);
         $response->assertStatus(422);
     }
 
@@ -34,7 +34,7 @@ class UserTest extends TestCase
             'name' => 'demo',
             'email' => 'example@example.com',
         ];
-        $response = $this->postJson('/api/user', $data);
+        $response = $this->postJson('/api/v1/user', $data);
 
         $response->assertStatus(422);
     }
@@ -46,7 +46,7 @@ class UserTest extends TestCase
             'password' => '1345',
             'email' => 'example',
         ];
-        $response = $this->postJson('/api/user', $data);
+        $response = $this->postJson('/api/v1/user', $data);
 
         $response->assertStatus(422);
     }
@@ -58,7 +58,7 @@ class UserTest extends TestCase
             'password' => '12345',
             'email' => rand(1111, 9999).'@example.com',
         ];
-        $response = $this->postJson('/api/user', $data);
+        $response = $this->postJson('/api/v1/user', $data);
 
         $response->assertStatus(200);
     }
@@ -66,14 +66,14 @@ class UserTest extends TestCase
     public function test_get_single_user_data_id_not_found(): void
     {
         $id = 1;
-        $response = $this->get('/api/user/'.$id);
+        $response = $this->get('/api/v1/user/'.$id);
         $response->assertStatus(404);
     }
 
     public function test_get_single_user_data(): void
     {
         $user = User::first();
-        $response = $this->get('/api/user/'.$user->id);
+        $response = $this->get('/api/v1/user/'.$user->id);
         $response->assertStatus(200);
     }
 
@@ -86,21 +86,22 @@ class UserTest extends TestCase
             '_method' => 'PUT'
         ];
         $user = User::first();
-        $response = $this->postJson('/api/user/'.$user->id, $data);
+        $response = $this->postJson('/api/v1/user/'.$user->id, $data);
         $response->assertStatus(200);
     }
 
     public function test_delete_user_data(): void
     {
         $user = User::first();
-        $response = $this->delete('/api/user/'.$user->id);
+        //dd($user->id);
+        $response = $this->delete('/api/v1/user/'.$user->id);
         $response->assertStatus(200);
     }
 
     public function test_delete_user_data_id_not_found(): void
     {
         $id = 1;
-        $response = $this->delete('/api/user/'.$id);
+        $response = $this->delete('/api/v1/user/'.$id);
         $response->assertStatus(404);
     }
 

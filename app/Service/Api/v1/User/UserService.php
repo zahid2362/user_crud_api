@@ -2,160 +2,128 @@
 
 namespace App\Service\Api\v1\User;
 
-use App\Http\Requests\Api\v1\User\UserRequest;
 use Exception;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
+use App\Response\Api\v1\ApiResponse;
+use App\Http\Requests\Api\v1\User\UserRequest;
+use Symfony\Component\HttpFoundation\Response;
 use App\Interface\Api\v1\User\UserServiceInterface;
-use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserService implements UserServiceInterface
 {
-    public function __construct(public string $logChannel = 'user_service')
+    public const LOG_CHANNEL = 'user_service';
+
+    public function __construct(public ApiResponse $response)
     {
     }
+
     /**
      * @param Request $request
-     * @return array<string, mixed>
+     * @return ApiResponse
     */
-    public function index(Request $request): array
+    public function index(Request $request): ApiResponse
     {
         try {
             $users = User::paginate($request->per_page ?? 10);
-            return [
-                'success' => true,
-                'users' => $users
-            ];
+            return $this->response->success(['users' => $users]);
         } catch (Exception $ex) {
-            Log::channel($this->logChannel)->error($ex->getMessage());
-            return $this->error(__('message.error'));
+            Log::channel(self::LOG_CHANNEL)->error($ex->getMessage());
+            return $this->response->failed(__('message.error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * @param UserRequest $request
-     * @return array<string, mixed>
+     * @return ApiResponse
     */
-    public function store(UserRequest $request): array
+    public function store(UserRequest $request): ApiResponse
     {
         try {
             $data = $request->validated();
+
             if(!empty($data['avatar'])) {
-                $data['avatar'] =  $this->storeAvatar($data['avatar']);
+                $fileName = date('ymdhis') . '-' . rand(1111, 9999);
+                $data['avatar'] =  fileUpload(User::AVATAR_PATH, $fileName, $data['avatar']);
             }
+
             $user = User::create($data);
-            return [
-                'success' => true,
-                'message' => __('message.user.create'),
-                'data' => $user
-            ];
+            return $this->response->success(['data' => $user], __('message.user.create'));
         } catch (Exception $ex) {
-            Log::channel($this->logChannel)->error($ex->getMessage());
-            return $this->error(__('message.error'));
+            Log::channel(self::LOG_CHANNEL)->error($ex->getMessage());
+            return $this->response->failed(__('message.error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * @param string $id
-     * @return array<string, mixed>
+     * @return ApiResponse
      */
-    public function show(string $id): array
+    public function show(string $id): ApiResponse
     {
         try {
-            $user = User::find($id);
-
-            return !empty($user) ? [
-                'success' => true,
-                'data' => $user
-            ] : $this->error(__('message.user.not.found'), 404);
-
+            $user = User::findOrFail($id);
+            return $this->response->success(['data' => $user]);
+        } catch(ModelNotFoundException $ex) {
+            Log::channel(self::LOG_CHANNEL)->error($ex->getMessage());
+            return $this->response->failed(__('message.user.not.found'), Response::HTTP_NOT_FOUND);
         } catch (Exception $ex) {
-            Log::channel($this->logChannel)->error($ex->getMessage());
-            return $this->error(__('message.error'));
+            Log::channel(self::LOG_CHANNEL)->error($ex->getMessage());
+            return $this->response->failed(__('message.error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * @param string $id
      * @param UserRequest $request
-     * @return array<string, mixed>
+     * @return ApiResponse
      */
-    public function update(string $id, UserRequest $request): array
+    public function update(string $id, UserRequest $request): ApiResponse
     {
         try {
+            $user = User::findOrFail($id);
             $data = $request->validated();
-            $user = User::find($id);
-
-            if(empty($user)) {
-                return $this->error(__('message.user.not.found'), 404);
-            }
 
             if(!empty($data['avatar'])) {
-                $data['avatar'] =  $this->storeAvatar($data['avatar'], $user->avatar);
+                $fileName = date('ymdhis') . '-' . rand(1111, 9999);
+                $data['avatar'] =  fileUpload(User::AVATAR_PATH, $fileName, $data['avatar'], $user->avatar);
             }
 
             $user->update($data);
 
-            return [
-                'success' => true,
-                'message' => __('message.user.update'),
-                'data' => $user
-            ];
+            return $this->response->success(['data' => $user], __('message.user.update'));
 
+        } catch(ModelNotFoundException $ex) {
+            Log::channel(self::LOG_CHANNEL)->error($ex->getMessage());
+            return $this->response->failed(__('message.user.not.found'), Response::HTTP_NOT_FOUND);
         } catch (Exception $ex) {
-            Log::channel($this->logChannel)->error($ex->getMessage());
-            return $this->error(__('message.error'));
+            Log::channel(self::LOG_CHANNEL)->error($ex->getMessage());
+            return $this->response->failed(__('message.error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * @param string $id
-     * @return array<string, mixed>
+     * @return ApiResponse
      */
-    public function destroy(string $id): array
+    public function destroy(string $id): ApiResponse
     {
         try {
             $user = User::destroy($id);
-
-            return !empty($user) ? [
-                'success' => true,
-                'message' => __('message.user.deleted')
-            ] : $this->error(__('message.user.not.found'), 404);
+            return !empty($user) ? $this->response->success(message:__('message.user.update')) : $this->response->failed(__('message.user.not.found'), Response::HTTP_NOT_FOUND);
         } catch (Exception $ex) {
-            Log::channel($this->logChannel)->error($ex->getMessage());
-            return $this->error(__('message.error'));
+            Log::channel(self::LOG_CHANNEL)->error($ex->getMessage());
+            return $this->response->failed(__('message.error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    /**
-     * @param mixed $file
-     * @param ?string $avatar
-     * @return string|bool
-     */
-    public function storeAvatar(mixed $file, ?string $avatar = null): string|bool
-    {
-        if (!empty($avatar) && Storage::exists($avatar)) {
-            Storage::delete($avatar);
-        }
-
-        $file_name = date('ymdhis') . '-' . rand(1111, 9999) . '.' . $file->getClientOriginalExtension();
-        return Storage::putFileAs(User::AVATAR_PATH, $file, $file_name);
-    }
-
-    /**
-     * @param string $message
-     * @param int $status
-     * @return array<string, mixed>
-     */
-    public function error(string $message = '', int $status = 500): array
-    {
-        return [
-            'success' => false,
-            'message' => $message,
-            'status' => $status,
-            'data' => []
-        ];
-    }
+    /*
+    |
+    |--------------------------------------------------------------------------
+    | class internal methods
+    |--------------------------------------------------------------------------
+    |
+    */
 }

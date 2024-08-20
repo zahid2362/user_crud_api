@@ -2,45 +2,40 @@
 
 namespace App\Http\Controllers\Api\v1\User;
 
-use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Response\Api\v1\ApiResponse;
 use App\Http\Requests\Api\v1\User\UserRequest;
-use App\Interface\Api\v1\User\UserServiceInterface;
+use App\Interface\Api\v1\User\UserServiceInterface as Service;
 
 class UserController extends Controller
 {
-    public function __construct(public UserServiceInterface $service)
+    public function __construct(public Service $service)
     {
     }
 
-    public function index(Request $request)
+    public function index(Request $request): ApiResponse
     {
-        $data = $this->service->index($request);
-        return response()->json(Arr::except($data, ['status']), $data['status'] ?? 200);
+        return $this->service->index($request);
     }
 
-    public function store(UserRequest $request)
+    public function store(UserRequest $request): ApiResponse
     {
-        $data = $this->service->store($request);
-        return response()->json(Arr::except($data, ['status']), $data['status'] ?? 200);
+        return $this->service->store($request);
     }
 
-    public function show(string $id)
+    public function show(string $id): ApiResponse
     {
-        $data = $this->service->show($id);
-        return response()->json(Arr::except($data, ['status']), $data['status'] ?? 200);
+        return $this->service->show($id);
     }
 
-    public function update(string $id, UserRequest $request)
+    public function update(string $id, UserRequest $request): ApiResponse
     {
-        $data = $this->service->update($id, $request);
-        return response()->json(Arr::except($data, ['status']), $data['status'] ?? 200);
+        return $this->service->update($id, $request);
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): ApiResponse
     {
-        $data = $this->service->destroy($id);
-        return response()->json(Arr::except($data, ['status']), $data['status'] ?? 200);
+        return $this->service->destroy($id);
     }
 }
