@@ -28,7 +28,7 @@ class UserService implements UserServiceInterface
     {
         try {
             $users = User::paginate($request->per_page ?? 10);
-            return $this->response->success(['users' => $users]);
+            return $this->response->success($users);
         } catch (Exception $ex) {
             Log::channel(self::LOG_CHANNEL)->error($ex->getMessage());
             return $this->response->failed(__('message.error'), Response::HTTP_INTERNAL_SERVER_ERROR);

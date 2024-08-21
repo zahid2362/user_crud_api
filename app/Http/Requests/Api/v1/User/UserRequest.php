@@ -2,12 +2,9 @@
 
 namespace App\Http\Requests\Api\v1\User;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\Api\v1\Base\BaseFormRequest;
 
-class UserRequest extends FormRequest
+class UserRequest extends BaseFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -33,7 +30,7 @@ class UserRequest extends FormRequest
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'email' => ['required', 'email', 'unique:users'],
             'password' => ['required', 'string', 'min:5', 'max:50'],
-            'avatar' => ['nullable', 'image','max:2048']
+            'avatar' => ['nullable', 'image', 'max:2048']
         ];
     }
 
@@ -41,23 +38,10 @@ class UserRequest extends FormRequest
     {
         return [
             'name' => ['nullable', 'string', 'min:2', 'max:255'],
-            'email' => ['nullable', 'email', 'unique:users,email,'.$this->route('user')],
+            'email' => ['nullable', 'email', 'unique:users,email,'. $this->route('user')],
             'password' => ['nullable', 'string', 'min:5', 'max:50'],
             'is_active' => ['nullable', 'boolean'],
             'avatar' => ['nullable', 'image','max:2048']
         ];
     }
-
-
-    public function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => __('message.error'),
-                'errors' => $validator->errors()
-            ], Response::HTTP_UNPROCESSABLE_ENTITY)
-        );
-    }
-
 }

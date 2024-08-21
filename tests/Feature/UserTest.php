@@ -25,7 +25,9 @@ class UserTest extends TestCase
     public function test_create_user_with_empty_body(): void
     {
         $response = $this->postJson('/api/v1/user', []);
-        $response->assertStatus(422);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name', 'email', 'password']);
     }
 
     public function test_create_user_with_partial_data(): void
@@ -36,7 +38,8 @@ class UserTest extends TestCase
         ];
         $response = $this->postJson('/api/v1/user', $data);
 
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
     }
 
     public function test_create_user_with_wrong_data(): void
@@ -48,7 +51,8 @@ class UserTest extends TestCase
         ];
         $response = $this->postJson('/api/v1/user', $data);
 
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+        ->assertJsonValidationErrors(['email', 'password']);
     }
 
     public function test_create_user_with_data(): void
@@ -60,7 +64,14 @@ class UserTest extends TestCase
         ];
         $response = $this->postJson('/api/v1/user', $data);
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)->assertJsonStructure([
+                'success',
+                'data' => [
+                    'id',
+                    'name',
+                    'email',
+                ]
+            ]);
     }
 
     public function test_get_single_user_data_id_not_found(): void
@@ -72,9 +83,19 @@ class UserTest extends TestCase
 
     public function test_get_single_user_data(): void
     {
-        $user = User::first();
+        $user = User::factory()->create([
+            'password' => 'password123',
+        ]);
         $response = $this->get('/api/v1/user/'.$user->id);
         $response->assertStatus(200);
+        //     ->assertJsonStructure([
+        //     'success',
+        //     'data' => [
+        //         'id',
+        //         'name',
+        //         'email',
+        //     ]
+        // ]);
     }
 
     public function test_update_user_data(): void
@@ -85,15 +106,18 @@ class UserTest extends TestCase
             'email' => rand(1111, 9999).'@example.com',
             '_method' => 'PUT'
         ];
-        $user = User::first();
+        $user = User::factory()->create([
+            'password' => 'password123',
+        ]);
         $response = $this->postJson('/api/v1/user/'.$user->id, $data);
         $response->assertStatus(200);
     }
 
     public function test_delete_user_data(): void
     {
-        $user = User::first();
-        //dd($user->id);
+        $user = User::factory()->create([
+            'password' => 'password123',
+        ]);
         $response = $this->delete('/api/v1/user/'.$user->id);
         $response->assertStatus(200);
     }

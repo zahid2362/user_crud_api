@@ -1,11 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Interface\Api\v1\Auth;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\Api\v1\Auth\LoginRequest;
 
 interface AuthServiceInterface
 {
-    public function login(Request $request):array;
-    public function registration(Request $request):array;
+    public function login(LoginRequest $request): array;
+    // public function registration(Request $request): ApiResponse;
 }

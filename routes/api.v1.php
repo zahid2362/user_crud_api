@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\v1\User\AuthController;
-use App\Http\Controllers\Api\v1\User\UserController;
+use App\Http\Controllers\Api\v1\{Auth\AuthController,User\UserController};
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +14,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('registration', 'registration');
 });
 
-
-Route::apiResource('user', UserController::class);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('me', function (Request $request) {
+        return $request->user();
+    });
+    Route::apiResource('user', UserController::class);
+});
