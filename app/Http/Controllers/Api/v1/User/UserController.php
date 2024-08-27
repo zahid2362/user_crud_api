@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\v1\User;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Response\Api\v1\ApiResponse;
 use App\Http\Requests\Api\v1\User\UserRequest;
 use App\Interface\Api\v1\User\UserServiceInterface as Service;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
@@ -14,28 +14,33 @@ class UserController extends Controller
     {
     }
 
-    public function index(Request $request): ApiResponse
+    public function index(Request $request): JsonResponse
     {
-        return $this->service->index($request);
+        $response = $this->service->index($request);
+        return response()->json($response['data'], $response['status']);
     }
 
-    public function store(UserRequest $request): ApiResponse
+    public function store(UserRequest $request): JsonResponse
     {
-        return $this->service->store($request);
+        $response = $this->service->store($request);
+        return response()->json($response['data'], $response['status']);
     }
 
-    public function show(string $id): ApiResponse
+    public function show(string $id): JsonResponse
     {
-        return $this->service->show($id);
+        $response = $this->service->show($id);
+        return response()->json($response['data'], $response['status']);
     }
 
-    public function update(string $id, UserRequest $request): ApiResponse
+    public function update(string $id, UserRequest $request): JsonResponse
     {
-        return $this->service->update($id, $request);
+        $response = $this->service->update($id, $request);
+        return response()->json($response['data'], $response['status']);
     }
 
-    public function destroy(string $id): ApiResponse
+    public function destroy(string $id): JsonResponse
     {
-        return $this->service->destroy($id);
+        $response = $this->service->destroy($id);
+        return response()->json($response['data'], $response['status']);
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -26,16 +27,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Record not found.',
+                    'message' => __('message.page.not.found'),
                     'success' => false
-                ], 404);
+                ], Response::HTTP_NOT_FOUND);
             }
         })->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Record not found.',
+                    'message' => __('auth.unauthenticated'),
                     'success' => false
-                ], 403);
+                ], Response::HTTP_UNAUTHORIZED);
             }
         });
     })->create();

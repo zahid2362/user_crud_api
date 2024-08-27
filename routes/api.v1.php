@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\{Auth\AuthController,User\UserController};
-use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,8 +14,6 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('me', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('profile', [AuthController::class , 'profile']);
     Route::apiResource('user', UserController::class);
 });

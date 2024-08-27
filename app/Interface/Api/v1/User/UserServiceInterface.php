@@ -4,13 +4,12 @@ namespace App\Interface\Api\v1\User;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\Api\v1\User\UserRequest;
-use App\Response\Api\v1\ApiResponse;
 
 interface UserServiceInterface
 {
-    public function index(Request $request): ApiResponse;
-    public function store(UserRequest $request): ApiResponse;
-    public function show(string $id): ApiResponse;
-    public function update(string $id, UserRequest $request): ApiResponse;
-    public function destroy(string $id): ApiResponse;
+    public function index(Request $request): array;
+    public function store(UserRequest $request): array;
+    public function show(string $id): array;
+    public function update(string $id, UserRequest $request): array;
+    public function destroy(string $id): array;
 }
